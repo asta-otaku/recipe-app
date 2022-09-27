@@ -1,23 +1,64 @@
-import logo from './logo.svg';
-import './App.css';
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import "./App.css";
+import Recipe from "./Recipe";
 
 function App() {
+  const APP_ID = "c7c7242c";
+  const APP_KEY = "2f1be0df5c58bae50ce8613204621905";
+
+  const [recipes, setRecipes] = useState([]);
+  const [search, setSearch] = useState("");
+  const [query, setQuery] = useState("chicken");
+
+  useEffect(() => {
+    getRecipes();
+  }, [query]);
+
+  const getRecipes = async () => {
+    const response = await axios
+      .get(
+        `https://api.edamam.com/search?q=${query}&app_id=${APP_ID}&app_key=${APP_KEY}`
+      )
+      .then((res) => setRecipes(res.data.hits))
+      .catch((err) => console.log(err));
+  };
+
+  const handleSearch = (e) => {
+    setSearch(e.target.value);
+  };
+
+  const getSearch = (e) => {
+    e.preventDefault();
+    setQuery(search);
+    setSearch("");
+  };
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>Hello React</h1>
+      <form onSubmit={getSearch} className="search-form">
+        <input
+          type="text"
+          className="search-bar"
+          value={search}
+          onChange={handleSearch}
+        />
+        <button type="submit" className="search-button">
+          Search
+        </button>
+      </form>
+      <div className="recipes">
+        {recipes.map((recipe) => (
+          <Recipe
+            key={recipe.recipe.label}
+            label={recipe.recipe.label}
+            calories={recipe.recipe.calories}
+            image={recipe.recipe.image}
+            ingredients={recipe.recipe.ingredients}
+          />
+        ))}
+      </div>
     </div>
   );
 }
